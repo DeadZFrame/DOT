@@ -92,7 +92,6 @@ while True:
             track_id += 1
 
     for object_id, pt in tracking_objects.items():
-        print(scores[object_id])
         if pt.object_ID == 2:
             cv2.circle(frame, pt.position, 5, (0, 0, 255), -1)
             cv2.putText(frame, str(object_id), (pt.position[0], pt.position[1] - 7), 0, 1, (0, 0, 255), 2)
