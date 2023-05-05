@@ -92,11 +92,13 @@ while True:
             track_id += 1
 
     for object_id, pt in tracking_objects.items():
-        if pt.object_ID == 2:
+        if pt.object_ID == 2 or pt.object_ID == 3:
             cv2.circle(frame, pt.position, 5, (0, 0, 255), -1)
             cv2.putText(frame, str(object_id), (pt.position[0], pt.position[1] - 7), 0, 1, (0, 0, 255), 2)
+
         if pt.object_ID == 0:
             cv2.putText(frame, "Person", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
+
         if pt.object_ID == 9:
             cv2.putText(frame, "Light", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
