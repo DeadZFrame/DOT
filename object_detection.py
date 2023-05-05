@@ -5,8 +5,6 @@ import numpy as np
 class ObjectDetection:
 
     def __init__(self, weights_path="dnn_model/yolov4.weights", cfg_path="dnn_model/yolov4.cfg"):
-        print("Loading Object Detection")
-        print("Running opencv dnn with YOLOv4")
         self.nmsThreshold = 0.4
         self.confThreshold = 0.5
         self.image_size = 608
@@ -31,7 +29,6 @@ class ObjectDetection:
             for class_name in file_object.readlines():
                 class_name = class_name.strip()
                 self.classes.append(class_name)
-                print(class_name)
 
         self.colors = np.random.uniform(0, 255, size=(80, 3))
         return self.classes

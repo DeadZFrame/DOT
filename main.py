@@ -9,16 +9,12 @@ cap = cv2.VideoCapture("Assets/Los Angeles 4K - California Glow - Scenic Drive -
 
 
 class Object:
-    name = 0
-    target = (0, 0)
+    object_ID = 0
+    position = (0, 0)
 
-    def __init__(self, name, target):
-        self.name = name
-        self.target = target
-
-
-def print_hi(name):
-    print(f'Hi, {name}')
+    def __init__(self, object_ID, position):
+        self.object_ID = object_ID
+        self.position = position
 
 
 # Initialize count
@@ -62,7 +58,7 @@ while True:
     if count <= 2:
         for pt in center_points_cur_frame:
             for pt2 in center_points_prev_frame:
-                distance = math.hypot(pt2.target[0] - pt.target[0], pt2.target[1] - pt.target[1])
+                distance = math.hypot(pt2.position[0] - pt.position[0], pt2.position[1] - pt.position[1])
 
                 if distance < 20:
                     tracking_objects[track_id] = pt
@@ -75,12 +71,13 @@ while True:
         for object_id, pt2 in tracking_objects_copy.items():
             object_exists = False
             for pt in center_points_cur_frame_copy:
-                distance = math.hypot(pt2.target[0] - pt.target[0], pt2.target[1] - pt.target[1])
+                distance = math.hypot(pt2.position[0] - pt.position[0], pt2.position[1] - pt.position[1])
 
                 # Update IDs position
                 if distance < 20:
                     tracking_objects[object_id] = pt
                     object_exists = True
+
                     if pt in center_points_cur_frame:
                         center_points_cur_frame.remove(pt)
                     continue
@@ -95,13 +92,14 @@ while True:
             track_id += 1
 
     for object_id, pt in tracking_objects.items():
-        cv2.circle(frame, pt.target, 5, (0, 0, 255), -1)
-        if pt.name == 2:
-            cv2.putText(frame, str(object_id), (pt.target[0], pt.target[1] - 7), 0, 1, (0, 0, 255), 2)
-        if pt.name == 0:
-            cv2.putText(frame, "Person", (pt.target[0], pt.target[1] - 7), 0, 1, (0, 0, 255), 2)
-        if pt.name == 9:
-            cv2.putText(frame, "Light", (pt.target[0], pt.target[1] - 7), 0, 1, (0, 0, 255), 2)
+        print(scores[object_id])
+        if pt.object_ID == 2:
+            cv2.circle(frame, pt.position, 5, (0, 0, 255), -1)
+            cv2.putText(frame, str(object_id), (pt.position[0], pt.position[1] - 7), 0, 1, (0, 0, 255), 2)
+        if pt.object_ID == 0:
+            cv2.putText(frame, "Person", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
+        if pt.object_ID == 9:
+            cv2.putText(frame, "Light", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
     cv2.imshow("Frame", frame)
 
