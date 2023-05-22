@@ -1,8 +1,7 @@
 import cv2
 from object_detection import ObjectDetection
 import math
-import imutils as imu
-import numpy as np
+from ImageDetection import detection
 
 # Initialize Object Detection
 od = ObjectDetection()
@@ -10,35 +9,22 @@ od = ObjectDetection()
 cap = cv2.VideoCapture("Assets/2023-05-09 18-12-33.mov")
 
 
-def calculate_distance(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-    edged = cv2.Canny(gray, 35, 125)
+def calculate_distance(image, width, pw):
+    if width < pw:
+        print(width)
+    pw = width
 
-    cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = imu.grab_contours(cnts)
-    m = max(cnts, key=cv2.contourArea)
-    marker = cv2.minAreaRect(m)
-
-    focal_length = (marker[1][0] * 20) / 2
-    inches = (20 * focal_length) / marker[1][0]
-
-    box = cv2.cv.BoxPoints(marker) if imu.is_cv2() else cv2.boxPoints(marker)
-    box = np.intp(box)
-    cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
-    cv2.putText(image, "%.2fft" % (inches / 12),
-                (image.shape[1] - 200, image.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
-                2.0, (0, 255, 0), 3)
-    #cv2.imshow("rect", image)
 
 
 class Object:
     object_ID = 0
     position = (0, 0)
+    vectors = []
 
-    def __init__(self, object_ID, position):
+    def __init__(self, object_ID, position, vectors):
         self.object_ID = object_ID
         self.position = position
+        self.vectors = vectors
 
 
 # Initialize count
@@ -48,6 +34,8 @@ center_points_prev_frame = []
 tracking_objects = {}
 track_id = 0
 bg = cv2.imread("Assets/bg.png")
+
+pw = 10000000000
 
 while True:
     ret, frame = cap.read()
@@ -68,16 +56,13 @@ while True:
         cy = int((y + y + h) / 2)
 
         temp.append((cx, cy))
-        # print("FRAME N°", count, " ", x, y, w, h)
-
-        # cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        #calculate_distance(frame, w, pw)
 
-    #cv2.imshow("rect", bg)
     index = 0
 
     for cid in class_ids:
-        obj = Object(cid, temp[index])
+        obj = Object(cid, temp[index], boxes[index])
         center_points_cur_frame.append(obj)
         index += 1
 
@@ -127,7 +112,10 @@ while True:
             cv2.putText(frame, "Person", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
         if pt.object_ID == 9:
-            cv2.putText(frame, "Light", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
+            (x, y, w, h) = pt.vectors
+            isred = detection(frame[y:y + h, x:x + w])
+            if isred: cv2.putText(frame, "Red", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
+
 
     cv2.imshow("Frame", frame)
 
