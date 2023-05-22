@@ -11,12 +11,9 @@ def detection(image):
 
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     mask = cv.inRange(hsv, lower_red, upper_red)
-    res = cv.bitwise_and(img, img, mask=mask)
 
-    img = cv.medianBlur(res, 5)
-
-    edged = cv.Canny(img, 30, 200)
-    contours, hierarchy = cv.findContours(edged, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
-    cv.drawContours(img, contours, -1, (0, 255, 0), 3)
-
-    return True
+    pixel_count = cv.countNonZero(mask)
+    if pixel_count > 20:
+        return True
+    else:
+        return False
