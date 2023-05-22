@@ -1,11 +1,35 @@
 import cv2
 from object_detection import ObjectDetection
 import math
+import imutils as imu
+import numpy as np
 
 # Initialize Object Detection
 od = ObjectDetection()
 
-cap = cv2.VideoCapture("Assets/Los Angeles 4K - California Glow - Scenic Drive - Trim.mp4")
+cap = cv2.VideoCapture("Assets/2023-05-09 18-12-33.mov")
+
+
+def calculate_distance(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    edged = cv2.Canny(gray, 35, 125)
+
+    cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imu.grab_contours(cnts)
+    m = max(cnts, key=cv2.contourArea)
+    marker = cv2.minAreaRect(m)
+
+    focal_length = (marker[1][0] * 20) / 2
+    inches = (20 * focal_length) / marker[1][0]
+
+    box = cv2.cv.BoxPoints(marker) if imu.is_cv2() else cv2.boxPoints(marker)
+    box = np.intp(box)
+    cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
+    cv2.putText(image, "%.2fft" % (inches / 12),
+                (image.shape[1] - 200, image.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
+                2.0, (0, 255, 0), 3)
+    #cv2.imshow("rect", image)
 
 
 class Object:
@@ -23,6 +47,7 @@ center_points_prev_frame = []
 
 tracking_objects = {}
 track_id = 0
+bg = cv2.imread("Assets/bg.png")
 
 while True:
     ret, frame = cap.read()
@@ -36,6 +61,7 @@ while True:
 
     # Detect objects on frame
     (class_ids, scores, boxes) = od.detect(frame)
+
     for box in boxes:
         (x, y, w, h) = box
         cx = int((x + x + w) / 2)
@@ -47,6 +73,7 @@ while True:
         # cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
+    #cv2.imshow("rect", bg)
     index = 0
 
     for cid in class_ids:
