@@ -8,14 +8,6 @@ od = ObjectDetection()
 
 cap = cv2.VideoCapture("Assets/2023-05-09 18-12-33.mov")
 
-
-def calculate_distance(image, width, pw):
-    if width < pw:
-        print(width)
-    pw = width
-
-
-
 class Object:
     object_ID = 0
     position = (0, 0)
@@ -35,7 +27,7 @@ tracking_objects = {}
 track_id = 0
 bg = cv2.imread("Assets/bg.png")
 
-pw = 10000000000
+pw = 1
 
 while True:
     ret, frame = cap.read()
@@ -57,7 +49,6 @@ while True:
 
         temp.append((cx, cy))
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        #calculate_distance(frame, w, pw)
 
     index = 0
 
@@ -103,20 +94,24 @@ while True:
             tracking_objects[track_id] = pt
             track_id += 1
 
+    nearest_car_pos = (0, 0)
     for object_id, pt in tracking_objects.items():
+        (x, y, w, h) = pt.vectors
         if pt.object_ID == 2 or pt.object_ID == 3:
             cv2.circle(frame, pt.position, 5, (0, 0, 255), -1)
             cv2.putText(frame, str(object_id), (pt.position[0], pt.position[1] - 7), 0, 1, (0, 0, 255), 2)
+            if w > pw:
+                pw = w
+                nearest_car_pos = (pt.position[0], pt.position[1])
 
         if pt.object_ID == 0:
             cv2.putText(frame, "Person", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
         if pt.object_ID == 9:
-            (x, y, w, h) = pt.vectors
             isred = detection(frame[y:y + h, x:x + w])
             if isred: cv2.putText(frame, "Red", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
-
+    cv2.putText(frame, "%.1fmt" % (2500 / pw), (nearest_car_pos[0], nearest_car_pos[1] - 50), 0, 1, (0, 0, 255), 2)
     cv2.imshow("Frame", frame)
 
     # Make a copy of the points
