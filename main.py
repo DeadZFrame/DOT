@@ -8,6 +8,9 @@ od = ObjectDetection()
 
 cap = cv2.VideoCapture("Assets/2023-05-09 18-12-33.mov")
 
+width = 840
+height = 480
+
 class Object:
     object_ID = 0
     position = (0, 0)
@@ -34,6 +37,7 @@ while True:
     count += 1
     if not ret:
         break
+    frame = cv2.resize(frame, (width, height))
 
     # Point current frame
     center_points_cur_frame = []
@@ -113,7 +117,8 @@ while True:
 
         if pt.object_ID == 9:
             isred = detection(frame[y:y + h, x:x + w])
-            if isred: cv2.putText(frame, "Red", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
+
+            if isred: cv2.putText(frame, "light", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
     cv2.imshow("Frame", frame)
 
