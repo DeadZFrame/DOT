@@ -104,6 +104,10 @@ while True:
                 pw = w
                 nearest_car_pos = (pt.position[0], pt.position[1])
 
+            distance = (2500 / pw)
+            cv2.putText(frame, "%.1fmt" % distance, (nearest_car_pos[0], nearest_car_pos[1] - 40), 0, 1, (0, 0, 255), 2)
+            if distance <= 3: cv2.putText(frame, "Too close", (nearest_car_pos[0], nearest_car_pos[1] - 70), 0, 1, (0, 0, 255), 2)
+
         if pt.object_ID == 0:
             cv2.putText(frame, "Person", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
@@ -111,7 +115,6 @@ while True:
             isred = detection(frame[y:y + h, x:x + w])
             if isred: cv2.putText(frame, "Red", (pt.position[0], pt.position[1]), 0, 1, (0, 0, 255), 2)
 
-    cv2.putText(frame, "%.1fmt" % (2500 / pw), (nearest_car_pos[0], nearest_car_pos[1] - 50), 0, 1, (0, 0, 255), 2)
     cv2.imshow("Frame", frame)
 
     # Make a copy of the points
